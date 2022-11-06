@@ -34,31 +34,19 @@ int main(int argc, char *argv[])
     float factor = atof(argv[3]);
 
     // TODO: Copy header from input file to output file
-uint8_t header[44];
 
-FILE *input = fopen("input.wav", "r");
-    if (input == NULL)
-    {
-        return 1;
-    }
-
-    FILE *output = fopen("output.wav", "w");
-    if (output == NULL)
-    {
-        fclose(input);
-        return 1;
-    }
-
-    while (fread(header, sizeof(int), 44, input) != EOF)             // EOF?
-    {
-        fwrite(header, sizeof(int), 44, output);
-    }
-
-    fclose(input);
-    fclose(output);
-
+    uint8_t header[44];            // Буфер куда будет помещаться считаная информация с функции fread, для последующей передачи в буфер читающего файла
+    fread(header, 44, 1, input);   // Функция для чтения файла и сохранения инфы в буфер
+    fwrite(header, 44, 1, output); // Функция записи из буфера в новый файл
 
     // TODO: Read samples from input file and write updated data to output file
+
+    int16_t buffer;                                   // Буфер, в данном случае это диапазон громкости состоящий из битов
+    while (fread(&buffer, sizeof(int16_t), 1, input)) // Функция из библиотеки
+    {
+        buffer *= factor;                            // буфер умножаем на значение фактора, значит повышаем или уменьшаем громкость файла
+        fwrite(&buffer, sizeof(int16_t), 1, output); // записываем это в исходящий файл
+    }
 
     // Close files
     fclose(input);
